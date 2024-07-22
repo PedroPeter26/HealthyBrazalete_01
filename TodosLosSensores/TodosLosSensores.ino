@@ -361,6 +361,26 @@ void loop() {
     MedirPulseSensor();
   }
 
+    char readChar = Serial.read();
+  switch (readChar) {
+    case 'T': // Temperatura
+      Serial.println("TMP:01:35");
+      break;
+    case 'R': // Ritmo cardiaco
+      Serial.println("RTC:01:120");
+      break;
+    case 'A': // Alcohol
+      Serial.println("ALC:01:50");
+      break;
+    case 'P': // Peso
+      Serial.println("PSO:01:450");
+      break;
+    default:
+      break;
+  }
+  readChar = '\0';
+  delay(1000);
+
 
   // Actualiza la pantalla
   ActualizarPantalla();

@@ -116,47 +116,97 @@ static const unsigned char PROGMEM logo3_bmp[] =
 
 
 int melody[] = {
-  NOTE_AS4,4, NOTE_G4,4, NOTE_A4,4, NOTE_G4,4,
-  NOTE_F4,8, NOTE_F4,8, NOTE_F4,8, NOTE_F4,8,
-  NOTE_AS4,4, NOTE_G4,4, NOTE_A4,4, NOTE_G4,4,
-  NOTE_FS4,8, NOTE_FS4,8, NOTE_FS4,8, NOTE_FS4,8,
-  NOTE_B4,4, NOTE_G4,4, NOTE_A4,4, NOTE_G4,4,
-  NOTE_GS4,8, NOTE_GS4,8, NOTE_GS4,8, NOTE_GS4,8,
-  NOTE_B4,4, NOTE_G4,4, NOTE_A4,4, NOTE_G4,4,
-  NOTE_AS4,8, NOTE_AS4,8, NOTE_AS4,8, NOTE_AS4,8,
-  REST,2
+  NOTE_D5,-4, NOTE_E5,-4, NOTE_A4,4, //1
+  NOTE_E5,-4, NOTE_FS5,-4, NOTE_A5,16, NOTE_G5,16, NOTE_FS5,8,
+  NOTE_D5,-4, NOTE_E5,-4, NOTE_A4,2,
+  NOTE_A4,16, NOTE_A4,16, NOTE_B4,16, NOTE_D5,8, NOTE_D5,16,
+  NOTE_D5,-4, NOTE_E5,-4, NOTE_A4,4, //repeat from 1
+  NOTE_E5,-4, NOTE_FS5,-4, NOTE_A5,16, NOTE_G5,16, NOTE_FS5,8,
+  NOTE_D5,-4, NOTE_E5,-4, NOTE_A4,2,
+  NOTE_A4,16, NOTE_A4,16, NOTE_B4,16, NOTE_D5,8, NOTE_D5,16,
+  REST,4, NOTE_B4,8, NOTE_CS5,8, NOTE_D5,8, NOTE_D5,8, NOTE_E5,8, NOTE_CS5,-8,
+  NOTE_B4,16, NOTE_A4,2, REST,4, 
 
+  REST,8, NOTE_B4,8, NOTE_B4,8, NOTE_CS5,8, NOTE_D5,8, NOTE_B4,4, NOTE_A4,8, //7
+  NOTE_A5,8, REST,8, NOTE_A5,8, NOTE_E5,-4, REST,4, 
+  NOTE_B4,8, NOTE_B4,8, NOTE_CS5,8, NOTE_D5,8, NOTE_B4,8, NOTE_D5,8, NOTE_E5,8, REST,8,
+  REST,8, NOTE_CS5,8, NOTE_B4,8, NOTE_A4,-4, REST,4,
+  REST,8, NOTE_B4,8, NOTE_B4,8, NOTE_CS5,8, NOTE_D5,8, NOTE_B4,8, NOTE_A4,4,
+  NOTE_E5,8, NOTE_E5,8, NOTE_E5,8, NOTE_FS5,8, NOTE_E5,4, REST,4,
+   
+  NOTE_D5,2, NOTE_E5,8, NOTE_FS5,8, NOTE_D5,8, //13
+  NOTE_E5,8, NOTE_E5,8, NOTE_E5,8, NOTE_FS5,8, NOTE_E5,4, NOTE_A4,4,
+  REST,2, NOTE_B4,8, NOTE_CS5,8, NOTE_D5,8, NOTE_B4,8,
+  REST,8, NOTE_E5,8, NOTE_FS5,8, NOTE_E5,-4, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+  NOTE_FS5,-8, NOTE_FS5,-8, NOTE_E5,-4, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+
+  NOTE_E5,-8, NOTE_E5,-8, NOTE_D5,-8, NOTE_CS5,16, NOTE_B4,-8, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16, //18
+  NOTE_D5,4, NOTE_E5,8, NOTE_CS5,-8, NOTE_B4,16, NOTE_A4,8, NOTE_A4,8, NOTE_A4,8, 
+  NOTE_E5,4, NOTE_D5,2, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+  NOTE_FS5,-8, NOTE_FS5,-8, NOTE_E5,-4, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+  NOTE_A5,4, NOTE_CS5,8, NOTE_D5,-8, NOTE_CS5,16, NOTE_B4,8, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+
+  NOTE_D5,4, NOTE_E5,8, NOTE_CS5,-8, NOTE_B4,16, NOTE_A4,4, NOTE_A4,8,  //23
+  NOTE_E5,4, NOTE_D5,2, REST,4,
+  REST,8, NOTE_B4,8, NOTE_D5,8, NOTE_B4,8, NOTE_D5,8, NOTE_E5,4, REST,8,
+  REST,8, NOTE_CS5,8, NOTE_B4,8, NOTE_A4,-4, REST,4,
+  REST,8, NOTE_B4,8, NOTE_B4,8, NOTE_CS5,8, NOTE_D5,8, NOTE_B4,8, NOTE_A4,4,
+  REST,8, NOTE_A5,8, NOTE_A5,8, NOTE_E5,8, NOTE_FS5,8, NOTE_E5,8, NOTE_D5,8,
+  
+  REST,8, NOTE_A4,8, NOTE_B4,8, NOTE_CS5,8, NOTE_D5,8, NOTE_B4,8, //29
+  REST,8, NOTE_CS5,8, NOTE_B4,8, NOTE_A4,-4, REST,4,
+  NOTE_B4,8, NOTE_B4,8, NOTE_CS5,8, NOTE_D5,8, NOTE_B4,8, NOTE_A4,4, REST,8,
+  REST,8, NOTE_E5,8, NOTE_E5,8, NOTE_FS5,4, NOTE_E5,-4, 
+  NOTE_D5,2, NOTE_D5,8, NOTE_E5,8, NOTE_FS5,8, NOTE_E5,4, 
+  NOTE_E5,8, NOTE_E5,8, NOTE_FS5,8, NOTE_E5,8, NOTE_A4,8, NOTE_A4,4,
+
+  REST,-4, NOTE_A4,8, NOTE_B4,8, NOTE_CS5,8, NOTE_D5,8, NOTE_B4,8, //35
+  REST,8, NOTE_E5,8, NOTE_FS5,8, NOTE_E5,-4, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+  NOTE_FS5,-8, NOTE_FS5,-8, NOTE_E5,-4, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+  NOTE_E5,-8, NOTE_E5,-8, NOTE_D5,-8, NOTE_CS5,16, NOTE_B4,8, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+  NOTE_D5,4, NOTE_E5,8, NOTE_CS5,-8, NOTE_B4,16, NOTE_A4,4, NOTE_A4,8, 
+
+   NOTE_E5,4, NOTE_D5,2, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16, //40
+  NOTE_FS5,-8, NOTE_FS5,-8, NOTE_E5,-4, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+  NOTE_A5,4, NOTE_CS5,8, NOTE_D5,-8, NOTE_CS5,16, NOTE_B4,8, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+  NOTE_D5,4, NOTE_E5,8, NOTE_CS5,-8, NOTE_B4,16, NOTE_A4,4, NOTE_A4,8,  
+  NOTE_E5,4, NOTE_D5,2, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+   
+  NOTE_FS5,-8, NOTE_FS5,-8, NOTE_E5,-4, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16, //45
+  NOTE_A5,4, NOTE_CS5,8, NOTE_D5,-8, NOTE_CS5,16, NOTE_B4,8, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+  NOTE_D5,4, NOTE_E5,8, NOTE_CS5,-8, NOTE_B4,16, NOTE_A4,4, NOTE_A4,8,  
+  NOTE_E5,4, NOTE_D5,2, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+  NOTE_FS5,-8, NOTE_FS5,-8, NOTE_E5,-4, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16, //45
+  
+  NOTE_A5,4, NOTE_CS5,8, NOTE_D5,-8, NOTE_CS5,16, NOTE_B4,8, NOTE_A4,16, NOTE_B4,16, NOTE_D5,16, NOTE_B4,16,
+  NOTE_D5,4, NOTE_E5,8, NOTE_CS5,-8, NOTE_B4,16, NOTE_A4,4, NOTE_A4,8, 
+
+  NOTE_E5,4, NOTE_D5,2, REST,4
 };
 
 
-// Variable global para almacenar el valor del umbral
-double umbralAlarma = 1000.0; // Inicializamos con un valor por defecto
-int umbralPasos = 5;      // Inicializamos con un valor por defecto
-int umbralTemperatura = 40;
-int pantallaMessageType = 2; // Variable global para almacenar el tipo de mensaje recibido para la pantalla
-//int melody[] = mldy_zelda; // Variable que contiene melodia actual
-
-// Son las variables que van a estar actualizandose a lo largo del codigo y que serán comparadas con su respectivo umbral
-// Cuando se actualicen los contadores deben compararse con el umbral y si es igual o mayor a este aplica funcion de activar alarma
-double distanciaContador = 0;
-int pasosContador = 0;
-
-String lastTemperatureMessage = ""; // Variable para almacenar el último mensaje de temperatura
-String lastBPMMessage = ""; // Variable para almacenar el último mensaje de ritmo cardíaco
-String lastClockMessage = ""; // Variable para almacenar el último mensaje del reloj
-
-
-int tempo = 160;
+int tempo = 130;
 int notes = sizeof(melody) / sizeof(melody[0]) / 2;
 int wholenote = (60000 * 4) / tempo;
 int divider = 0, noteDuration = 0;
-
 
 unsigned long previousMillis = 0;
 int thisNote = 0;
 bool alarmActive = false;
 
+String lastClockMessage = "00:00";
 
+// Variable global para almacenar el valor del umbral
+double umbralAlarma = 1000; // Inicializamos con un valor por defecto
+int umbralPasos = 5;      // Inicializamos con un valor por defecto
+int umbralRitmoCardiaco = 100;
+int pantallaMessageType = 1; // Variable global para almacenar el tipo de mensaje recibido para la pantalla
+
+// Son las variables que van a estar actualizandose a lo largo del codigo y que serán comparadas con su respectivo umbral
+// Cuando se actualicen los contadores deben compararse con el umbral y si es igual o mayor a este aplica funcion de activar alarma
+double distanciaContador = 0;
+int pasosContador = 0;
+int ritmoCardiacoContador = 0;
 
 // Definir los pines para la comunicación I2C
 const int mpu_sda_pin = 33;
@@ -175,7 +225,8 @@ byte rateSpot = 0;
 long lastBeat = 0; 
 float beatsPerMinute;
 int beatAvg;
-bool inactive;
+
+int mq3Value = 0;
 
 // Coeficientes del termistor para la ecuación de Steinhart-Hart
 const double A = 0.001129148;
@@ -190,6 +241,7 @@ const double C = 0.0000000876741;
 MPU6050 mpu;
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire1);
 double distancia = 0;
+int16_t ax, ay, az;
 
 //Consts acelerómetro
 const int threshold = 13120;
@@ -201,15 +253,17 @@ unsigned long previousMillisAccel = 0;
 unsigned long previousMillisMQ3 = 0;
 unsigned long previousMillisTermistor = 0;
 unsigned long previousMillisPulseSensor = 0;
-const long intervalAccel = 100;  // Intervalo para la función Acelerometro
-const long intervalMQ3 = 5000;   // Intervalo para la función MQ3
-const long intervalTermistor = 2000; // Intervalo para la función Termistor
+unsigned long previousMillisData = 0;
+const long intervalAccel = 100;  
+const long intervalMQ3 = 5000;
+const long intervalTermistor = 2000;
 const long intervalPulseSensor = 20;
+const long intervalData = 5000;
 
 // Vars globales sensores
 double temperature = 0.0;
 int myBPM = 0;
-
+String readString = "";
 
 /*
 
@@ -278,16 +332,69 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 */
 
-  int redPin = 13;
-  int greenPin = 12;
-  int bluePin = 14;
+
+class Sensor{
+  public:
+    int id = 0;
+    String value = "0";
+
+    Sensor(){
+    }
+    void setId(int i){
+      id = i;
+    }
+    void setValue(String v){
+      value = v;
+    }
+    String getValue(){
+      return value;
+    }
+    int getId(){
+      return id;
+    }
+};
+
+int numSensoresRitmoCardiaco = -1;
+int numSensoresTemperatura = -1;
+int numSensoresPasos = -1;
+int numSensoresDistancia = -1;
+int numSensoresAlcohol = -1;
+
+Sensor sensoresRitmoCardiaco[3];
+Sensor sensoresTemperatura[3];
+Sensor sensoresPasos[3];
+Sensor sensoresDistancia[3];
+Sensor sensoresAlcohol[3];
+
+
+const int button1Pin = 16; 
+const int button2Pin = 17;
+bool button1State = LOW;
+bool button2State = LOW;
+
+// const int redPin = 13;
+// const int greenPin = 12;
+// const int bluePin = 14;
+
+//const int intervalLed = 150;
+
+//int redValue = 0;
+//int greenValue = 0;
+//int blueValue = 0;
+
+//int colorIndex = 0;
+//const int maxColorIndex = 255;
+
+//unsigned long previousMillisLed = 0;
 
 void setup() {
   Serial.begin(9600);
-  pinMode(bluePin, OUTPUT);
-  pinMode(greenPin, OUTPUT);
-  pinMode(redPin, OUTPUT);
+//  pinMode(bluePin, OUTPUT);
+//  pinMode(greenPin, OUTPUT);
+//  pinMode(redPin, OUTPUT);
 
+  pinMode(button1Pin, INPUT_PULLUP);
+  pinMode(button2Pin, INPUT_PULLUP);
   //Activar sensor MAX30105
   
   Wire1.begin(max_sda_pin, max_scl_pin);
@@ -328,6 +435,7 @@ void setup() {
 
   pinMode(mq3Pin, INPUT);
   pinMode(BUZZER_PIN, OUTPUT);
+  
 
     
 
@@ -335,7 +443,6 @@ void setup() {
 
 void loop() {
   unsigned long currentMillis = millis();
-  activarAlarma();
 
   // Llama a la función Acelerometro cada intervaloAccel milisegundos
   if (currentMillis - previousMillisAccel >= intervalAccel) {
@@ -359,46 +466,174 @@ void loop() {
   if (currentMillis - previousMillisPulseSensor >= intervalPulseSensor) {
     previousMillisPulseSensor = currentMillis;
     MedirPulseSensor();
-  }
-
-    char readChar = Serial.read();
-  switch (readChar) {
-    case 'T': // Temperatura
-      Serial.println("TMP:01:35");
-      break;
-    case 'R': // Ritmo cardiaco
-      Serial.println("RTC:01:120");
-      break;
-    case 'A': // Alcohol
-      Serial.println("ALC:01:50");
-      break;
-    case 'P': // Peso
-      Serial.println("PSO:01:450");
-      break;
-    default:
-      break;
-  }
-  readChar = '\0';
-  delay(1000);
-
-
-  // Actualiza la pantalla
   ActualizarPantalla();
+    
+  if (digitalRead(button1Pin) == LOW && button1State == HIGH) {
+    if(pantallaMessageType<5){
+      pantallaMessageType = pantallaMessageType + 1;
+    }else{
+      pantallaMessageType = 1;
+    }
+  }
+  
+  button1State = digitalRead(button1Pin);
+  }
+  if (currentMillis - previousMillisData >= intervalData) {
+    previousMillisData = currentMillis;
+    EnviarDatos();
+  }
+
+//  if (currentMillis - previousMillisLed >= intervalLed) {
+//    previousMillisLed = currentMillis;
+//    cambiarColor();
+//  }
+
+
+
+  if (digitalRead(button2Pin) == LOW && button2State == HIGH) {
+    previousMillis = millis();
+    thisNote = 0;
+    alarmActive = false;
+    noTone(BUZZER_PIN);
+  }
+  
+  button2State = digitalRead(button2Pin);
+
+  activarAlarma();
+  
+}
+
+//void cambiarColor(){
+  
+//    switch(colorIndex / 85) {
+//      case 0:
+//        redValue = 0;
+//        greenValue = colorIndex * 3;
+//        blueValue = 255 - colorIndex * 3;
+//        break;
+//      case 1:
+//        redValue = (colorIndex - 85) * 3;
+//        greenValue = 255 - (colorIndex - 85) * 3;
+//        blueValue = 0;
+//        break;
+//      case 2:
+//        redValue = 255 - (colorIndex - 170) * 3;
+//        greenValue = 0;
+//        blueValue = (colorIndex - 170) * 3;
+//        break;
+//    }
+//
+//    analogWrite(redPin, redValue);
+//    analogWrite(greenPin, greenValue);
+//    analogWrite(bluePin, blueValue);
+    
+
+//    colorIndex++;
+//    if (colorIndex > maxColorIndex) {
+//      colorIndex = 0;
+//    }
+//}
+
+void printSensorValue(int id,String type){
+  if(type=="TMP"){
+    for(int i = 0; i <= numSensoresTemperatura; i++){
+      if(sensoresTemperatura[i].id==id){
+        Serial.println("TMP:" +String(id)+":"+ sensoresTemperatura[i].value);
+      }
+    }
+  }
+  else if(type=="RTC"){
+    for(int i = 0; i <= numSensoresRitmoCardiaco; i++){
+      if(sensoresRitmoCardiaco[i].id==id){
+        Serial.println("RTC:" +String(id)+":"+ sensoresRitmoCardiaco[i].value);
+      }
+    }
+  }
+  else if(type=="ALC"){
+    for(int i = 0; i <= numSensoresAlcohol; i++){
+      if(sensoresAlcohol[i].id==id){
+        Serial.println("ALC:" +String(id)+":"+ sensoresAlcohol[i].value);
+      }
+    }
+  }
+  else if(type=="PSS"){
+    for(int i = 0; i <= numSensoresPasos; i++){
+      if(sensoresPasos[i].id==id){
+        Serial.println("PSS:" +String(id)+":"+ sensoresPasos[i].value);
+      }
+    }
+  }
+  else if(type=="DST"){
+    for(int i = 0; i <= numSensoresDistancia; i++){
+      if(sensoresDistancia[i].id==id){
+        Serial.println("DST:" +String(id)+":"+ sensoresDistancia[i].value);
+      }
+    }
+  }
+}
+
+void EnviarDatos(){
+    readString = Serial.readStringUntil('\n');
+    if(readString != ""){
+      String request = readString.substring(0, 3);
+      String typeRequest = readString.substring(5, 7); 
+      if(request=="REA"){
+        int id = readString.substring(9).toInt();
+        printSensorValue(id,typeRequest);
+      } else if (request=="NEW"){
+        int id = readString.substring(9).toInt();
+        if (typeRequest == "TMP") {
+          if(numSensoresTemperatura+1<=3){
+            sensoresTemperatura[numSensoresTemperatura+1].id = id; 
+            numSensoresTemperatura = numSensoresTemperatura + 1;
+          }
+        } else if (typeRequest == "RTC") {
+          if(numSensoresRitmoCardiaco+1<=3){
+            sensoresRitmoCardiaco[numSensoresRitmoCardiaco+1].id = id; 
+            numSensoresRitmoCardiaco = numSensoresRitmoCardiaco + 1;
+          }
+        } else if (typeRequest == "ALC") {
+          if(numSensoresAlcohol+1<=3){
+            sensoresAlcohol[numSensoresAlcohol+1].id = id; 
+            numSensoresAlcohol = numSensoresAlcohol + 1;
+          }
+        } else if (typeRequest == "PSS") {
+          if(numSensoresPasos+1<=3){
+            sensoresPasos[numSensoresPasos+1].id = id; 
+            numSensoresPasos = numSensoresPasos + 1;
+          }
+        } else if (typeRequest == "DST") {
+          if(numSensoresDistancia+1<=3){
+            sensoresDistancia[numSensoresDistancia+1].id = id; 
+            numSensoresDistancia = numSensoresDistancia + 1;
+          }
+        }
+      } else if (request=="UPA"){
+        if (typeRequest == "RTC") {
+          umbralRitmoCardiaco = readString.substring(9).toInt();
+        } else if (typeRequest == "PSS") {
+          umbralPasos = readString.substring(9).toInt();
+        } else if (typeRequest == "DST") {
+          umbralAlarma = readString.substring(9).toFloat();
+        }
+      }
+    readString = "";
+
+    }
+  
+
 }
 
 void Acelerometro() {
-  int16_t ax, ay, az;
   mpu.getAcceleration(&ax, &ay, &az);
 
   int16_t delta_acc_z = abs(az - prev_acc_z);
   if (delta_acc_z > threshold) {
     stepCount++;
     distancia += 0.45; // Suponiendo que cada paso es de 45 cm
-    Serial.print("Pasos: ");
-    Serial.println(stepCount);
-    Serial.print("Distancia: ");
-    Serial.println(distancia);
 
+    sensoresPasos[0].value = String(stepCount);
+    sensoresDistancia[0].value = String(distancia);
     pasosContador++;
     distanciaContador = distanciaContador + 0.45;
 
@@ -412,22 +647,14 @@ void Acelerometro() {
       distanciaContador = 0;
     }
 
-    
-    // Aqui se añade codigo para enviar distancia y stepCount a Raspberry PI por bluetooth
-
   }
 
   prev_acc_z = az;
 }
 
 void MedirMQ3() {
-  int mq3Value = analogRead(mq3Pin) - 800;
-  Serial.print("Valor del sensor MQ3: ");
-  Serial.println(mq3Value);
-
-  
-    // Aqui se añade codigo para enviar mq3Value a Raspberry PI por bluetooth
-
+  mq3Value = analogRead(mq3Pin) - 800;
+  sensoresAlcohol[0].value = String(mq3Value);
 
 }
 
@@ -436,28 +663,17 @@ void MedirTermistor() {
   double voltage = (rawValue / 4095.0) * 3.3; // Convierte a voltaje
   double resistance = (3.3 * 10000 / voltage) - 10000; // Calcula la resistencia del NTC
 
-  // Calcula la temperatura usando la ecuación de Steinhart-Hart
   temperature = (1.0 / (A + B * log(resistance) + C * pow(log(resistance), 3))) - 273.15;
 
-  Serial.print("Temperatura: ");
-  Serial.print(temperature);
-  Serial.println(" C");
-  
-  if(temperature >= umbralTemperatura){
-    iniciarAlarma();
-  }
-
-  
-    // Aqui se añade codigo para enviar temperature a Raspberry PI por bluetooth
+  sensoresTemperatura[0].value = String(temperature);
 
 }
 
 void MedirPulseSensor() {
 
-long irValue = particleSensor.getIR();
-
-  if (checkForBeat(irValue) == true)
-  {
+    long irValue = particleSensor.getIR();
+    if(checkForBeat(irValue) == true){
+  
     long delta = millis() - lastBeat;
     lastBeat = millis();
 
@@ -472,20 +688,16 @@ long irValue = particleSensor.getIR();
       for (byte x = 0 ; x < RATE_SIZE ; x++)
         beatAvg += rates[x];
       beatAvg /= RATE_SIZE;
-      
+
+      sensoresRitmoCardiaco[0].value = String(beatAvg);
+      ritmoCardiacoContador = beatAvg;
+
+    if(ritmoCardiacoContador >= umbralRitmoCardiaco){
+      iniciarAlarma();
+      ritmoCardiacoContador = 0;
+    }
     }
   }
-    if(irValue>90000.0){
-      
-      inactive = false;}
-      else{
-      inactive = true;
-    }
-
-  
-    
-    // Aqui se añade codigo para enviar myBPM a Raspberry PI por bluetooth
-
   
 }
 
@@ -493,6 +705,7 @@ void iniciarAlarma() {
   alarmActive = true;
   previousMillis = millis();
   thisNote = 0;
+  
 }
 
 void activarAlarma() {
@@ -502,29 +715,22 @@ void activarAlarma() {
 
   if (thisNote < notes * 2) {
     if (currentMillis - previousMillis >= noteDuration) {
-      // Move to the next note
       thisNote += 2;
 
-      // If there are still notes left
       if (thisNote < notes * 2) {
-        // calculates the duration of each note
         divider = melody[thisNote + 1];
         if (divider > 0) {
-          // regular note, just proceed
           noteDuration = (wholenote) / divider;
         } else if (divider < 0) {
-          // dotted notes are represented with negative durations!!
           noteDuration = (wholenote) / abs(divider);
-          noteDuration *= 1.5; // increases the duration in half for dotted notes
+          noteDuration *= 1.5; 
         }
-
-        // we only play the note for 90% of the duration, leaving 10% as a pause
+        
+        //cambiarColor();
         tone(BUZZER_PIN, melody[thisNote], noteDuration * 0.9);
 
-        // Record the current time for the next note
         previousMillis = currentMillis;
       } else {
-        // No more notes, stop the alarm
         alarmActive = false;
         noTone(BUZZER_PIN);
       }
@@ -541,10 +747,9 @@ void ActualizarPantalla() {
   display.setCursor(0, 0);
 
   // Imprime la información correspondiente según el tipo de mensaje para la pantalla
-    if (inactive==true){
+  if (ir < 9000 && pantallaMessageType != 5){
     display.println("Uso ");
     display.println("Inactivo ");
-
   }
   else{
     switch (pantallaMessageType) {
@@ -565,17 +770,9 @@ void ActualizarPantalla() {
         display.setCursor(50,18);                
         display.println(beatAvg);  
         display.display();
-        analogWrite(redPin, 255);
-        analogWrite(greenPin, 255);
-        analogWrite(bluePin, 255);
         
       if (checkForBeat(ir) == true)                       
       {
-        analogWrite(redPin, 91);
-        analogWrite(greenPin, 163);
-        analogWrite(bluePin, 56);
-
-
         display.clearDisplay();                              
         display.drawBitmap(0, 0, logo3_bmp, 32, 32, WHITE);    
         display.setTextSize(2);                               
@@ -599,13 +796,11 @@ void ActualizarPantalla() {
         break;
       case 4:
         // Imprimir reloj
-        if (lastClockMessage != "") {
           display.println(lastClockMessage);
-        }
+        
         break;
       default:
-        // No se ha seleccionado ningún tipo de mensaje para la pantalla
-        display.println("Sin seleccionar");
+        display.println("");
         break;
     }
   }

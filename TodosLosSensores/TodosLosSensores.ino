@@ -206,7 +206,7 @@ int pantallaMessageType = 1; // Variable global para almacenar el tipo de mensaj
 // Cuando se actualicen los contadores deben compararse con el umbral y si es igual o mayor a este aplica funcion de activar alarma
 double distanciaContador = 0;
 int pasosContador = 0;
-int ritmoCardiacoContador = 0;
+bool ritmoCardiacoAlarmaActivo = true;
 
 // Definir los pines para la comunicación I2C
 const int mpu_sda_pin = 33;
@@ -255,11 +255,8 @@ unsigned long previousMillisTermistor = 0;
 unsigned long previousMillisPulseSensor = 0;
 unsigned long previousMillisData = 0;
 const long intervalAccel = 100;  
-const long intervalMQ3 = 5000;
-const long intervalTermistor = 2000;
+const long intervalMQ3 = 6000;
 const long intervalPulseSensor = 20;
-const long intervalData = 5000;
-
 // Vars globales sensores
 double temperature = 0.0;
 int myBPM = 0;
@@ -444,61 +441,41 @@ void setup() {
 void loop() {
   unsigned long currentMillis = millis();
 
-  // Llama a la función Acelerometro cada intervaloAccel milisegundos
   if (currentMillis - previousMillisAccel >= intervalAccel) {
     previousMillisAccel = currentMillis;
     Acelerometro();
   }
-
-  // Llama a la función MQ3 cada intervaloMQ3 milisegundos
   if (currentMillis - previousMillisMQ3 >= intervalMQ3) {
     previousMillisMQ3 = currentMillis;
     MedirMQ3();
-  }
-
-  // Llama a la función Termistor cada intervaloTermistor milisegundos
-  if (currentMillis - previousMillisTermistor >= intervalTermistor) {
-    previousMillisTermistor = currentMillis;
     MedirTermistor();
+    EnviarDatos();
   }
-
-  // Llama a la función PulseSensor cada intervaloPulseSensor milisegundos
   if (currentMillis - previousMillisPulseSensor >= intervalPulseSensor) {
     previousMillisPulseSensor = currentMillis;
     MedirPulseSensor();
-  ActualizarPantalla();
-    
-  if (digitalRead(button1Pin) == LOW && button1State == HIGH) {
-    if(pantallaMessageType<5){
-      pantallaMessageType = pantallaMessageType + 1;
-    }else{
-      pantallaMessageType = 1;
+    ActualizarPantalla();
+    if (digitalRead(button1Pin) == LOW && button1State == HIGH) {
+      if(pantallaMessageType<5){
+        pantallaMessageType = pantallaMessageType + 1;
+      }else{
+        pantallaMessageType = 1;
+      }
+    }else if (digitalRead(button2Pin) == LOW && button2State == HIGH) {
+      previousMillis = millis();
+      thisNote = 0;
+      alarmActive = false;
+      noTone(BUZZER_PIN);
     }
-  }
-  
-  button1State = digitalRead(button1Pin);
-  }
-  if (currentMillis - previousMillisData >= intervalData) {
-    previousMillisData = currentMillis;
-    EnviarDatos();
+    
+    button1State = digitalRead(button1Pin);
+    button2State = digitalRead(button2Pin);
   }
 
 //  if (currentMillis - previousMillisLed >= intervalLed) {
 //    previousMillisLed = currentMillis;
 //    cambiarColor();
 //  }
-
-
-
-  if (digitalRead(button2Pin) == LOW && button2State == HIGH) {
-    previousMillis = millis();
-    thisNote = 0;
-    alarmActive = false;
-    noTone(BUZZER_PIN);
-  }
-  
-  button2State = digitalRead(button2Pin);
-
   activarAlarma();
   
 }
@@ -526,8 +503,6 @@ void loop() {
 //    analogWrite(redPin, redValue);
 //    analogWrite(greenPin, greenValue);
 //    analogWrite(bluePin, blueValue);
-    
-
 //    colorIndex++;
 //    if (colorIndex > maxColorIndex) {
 //      colorIndex = 0;
@@ -576,12 +551,12 @@ void EnviarDatos(){
     readString = Serial.readStringUntil('\n');
     if(readString != ""){
       String request = readString.substring(0, 3);
-      String typeRequest = readString.substring(5, 7); 
+      String typeRequest = readString.substring(4, 7);
       if(request=="REA"){
-        int id = readString.substring(9).toInt();
+        int id = readString.substring(8).toInt();
         printSensorValue(id,typeRequest);
       } else if (request=="NEW"){
-        int id = readString.substring(9).toInt();
+        int id = readString.substring(8).toInt();
         if (typeRequest == "TMP") {
           if(numSensoresTemperatura+1<=3){
             sensoresTemperatura[numSensoresTemperatura+1].id = id; 
@@ -591,6 +566,7 @@ void EnviarDatos(){
           if(numSensoresRitmoCardiaco+1<=3){
             sensoresRitmoCardiaco[numSensoresRitmoCardiaco+1].id = id; 
             numSensoresRitmoCardiaco = numSensoresRitmoCardiaco + 1;
+            Serial.println(String(sensoresRitmoCardiaco[numSensoresRitmoCardiaco].id));
           }
         } else if (typeRequest == "ALC") {
           if(numSensoresAlcohol+1<=3){
@@ -610,15 +586,20 @@ void EnviarDatos(){
         }
       } else if (request=="UPA"){
         if (typeRequest == "RTC") {
-          umbralRitmoCardiaco = readString.substring(9).toInt();
+          umbralRitmoCardiaco = readString.substring(8).toInt();
         } else if (typeRequest == "PSS") {
-          umbralPasos = readString.substring(9).toInt();
+          umbralPasos = readString.substring(8).toInt();
+          pasosContador = 0;
         } else if (typeRequest == "DST") {
-          umbralAlarma = readString.substring(9).toFloat();
+          umbralAlarma = readString.substring(8).toFloat();
+          distanciaContador = 0;
         }
+      }else if (request=="RLJ"){
+        lastClockMessage = readString.substring(8);
+      }else if (request=="UPS"){
+        pantallaMessageType = readString.substring(8).toInt();
       }
     readString = "";
-
     }
   
 
@@ -690,11 +671,13 @@ void MedirPulseSensor() {
       beatAvg /= RATE_SIZE;
 
       sensoresRitmoCardiaco[0].value = String(beatAvg);
-      ritmoCardiacoContador = beatAvg;
+      if(beatAvg <= umbralRitmoCardiaco){
+        ritmoCardiacoAlarmaActivo = true;
+      }
 
-    if(ritmoCardiacoContador >= umbralRitmoCardiaco){
+    if(ritmoCardiacoAlarmaActivo == true && beatAvg >= umbralRitmoCardiaco){
       iniciarAlarma();
-      ritmoCardiacoContador = 0;
+      ritmoCardiacoAlarmaActivo = false;
     }
     }
   }

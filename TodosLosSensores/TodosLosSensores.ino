@@ -144,6 +144,7 @@ const int PROGMEM melody[] = {
   NOTE_GS5,2,
 };
 
+bool activo = false;
 
 int notes = sizeof(melody) / sizeof(melody[0]) / 2;
 int wholenote = (60000 * 4) / 144;
@@ -256,6 +257,7 @@ void setup() {
   display.clearDisplay();
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
+  display.display();
 
   pinMode(mq3Pin, INPUT);
   pinMode(BUZZER_PIN, OUTPUT);
@@ -343,7 +345,30 @@ void EnviarDatos(){
     if(request=="REA"){
       Serial.println(getSensorValue(linea.substring(4)));
     } 
+    else if (request=="RLJ"){
+      lastClockMessage = linea.substring(4);
+      if(pantallaMessageType==4){
+        ActualizarPantalla(); 
+      }
+    }
+    else if (request=="UPA"){
+      String typeRequest = linea.substring(4, 7);
+      if (typeRequest == "RTC") {
+        umbralRitmoCardiaco = linea.substring(8).toInt();
+      } else if (typeRequest == "PSS") {
+        umbralPasos = linea.substring(8).toInt();
+        pasosContador = 0;
+      } else if (typeRequest == "DST") {
+        umbralAlarma = linea.substring(8).toFloat();
+        distanciaContador = 0;
+      }
+      else if (typeRequest=="UPS"){
+        pantallaMessageType = linea.substring(8).toInt();
+        ActualizarPantalla(); 
+      }
+    }
     else if (request=="NEW"){
+      activo = true;
       if(numSensores<=15){
         String id = linea.substring(8);
         bool agregar = true;
@@ -362,27 +387,34 @@ void EnviarDatos(){
         }
       }
     } 
-    else if (request=="UPA"){
-      String typeRequest = linea.substring(4, 7);
-      if (typeRequest == "RTC") {
-        umbralRitmoCardiaco = linea.substring(8).toInt();
-      } else if (typeRequest == "PSS") {
-        umbralPasos = linea.substring(8).toInt();
-        pasosContador = 0;
-      } else if (typeRequest == "DST") {
-        umbralAlarma = linea.substring(8).toFloat();
-        distanciaContador = 0;
-      }
-      else if (typeRequest=="UPS"){
-        pantallaMessageType = linea.substring(8).toInt();
-        ActualizarPantalla(); 
-      }
-    }
-    else if (request=="RLJ"){
-      lastClockMessage = linea.substring(4);
-      if(pantallaMessageType==4){
-        ActualizarPantalla(); 
-      }
+    else if(request == "DES"){
+      activo = false;
+      int firstColonIndex = linea.indexOf(':');
+      int secondColonIndex = linea.indexOf(':', firstColonIndex + 1);
+      String id1 = linea.substring(firstColonIndex + 1, secondColonIndex);
+      String id2 = linea.substring(secondColonIndex+1);
+
+      if(id1=="0"){
+        display.clearDisplay();
+        display.setTextSize(2);
+        display.setTextColor(SSD1306_WHITE);
+        display.setCursor(0, 0);
+        display.println("No");
+        display.println("registrado");
+        display.println("Conecta a internet");
+        display.display();
+      } 
+      else {
+        display.clearDisplay();
+        display.setTextSize(2);
+        display.setTextColor(SSD1306_WHITE);
+        display.setCursor(0, 0);
+        display.println("No");
+        display.println("registrado");
+        display.println("Reloj: "+id1);
+        display.println("Pesa: "+id2);
+        display.display();
+      } 
     }
 
     if(readString.indexOf('\n') != -1){
@@ -590,63 +622,65 @@ void activarAlarma() {
 
 void ActualizarPantalla() {
   // Actualiza la pantalla con los valores almacenados
-  display.clearDisplay();
-  display.setTextSize(2);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(0, 0);
+  if(activo==true){
+    display.clearDisplay();
+    display.setTextSize(2);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(0, 0);
 
-  // Imprime la información correspondiente según el tipo de mensaje para la pantalla
-    switch (pantallaMessageType) {
-      case 1:
-        // Imprimir distancia y pasos
-        display.print("Distancia: ");
-        display.println(distancia);
-        display.print("Pasos: ");
-        display.println(stepCount);
-        break;
-      case 2:
-        // Imprimir ritmo cardíaco
-        display.drawBitmap(5, 5, logo2_bmp, 24, 21, WHITE);       
-        display.setTextSize(2);                                   
-        display.setTextColor(WHITE);  
-        display.setCursor(50,0);                
-        display.println("BPM");             
-        display.setCursor(50,18);                
-        display.println(beatAvg);  
-        display.display();
-        
-      if (checkForBeat(particleSensor.getIR()) == true)                       
-      {
-        display.clearDisplay();                              
-        display.drawBitmap(0, 0, logo3_bmp, 32, 32, WHITE);    
-        display.setTextSize(2);                               
-        display.setTextColor(WHITE);             
-        display.setCursor(50,0);                
-        display.println("BPM");             
-        display.setCursor(50,18);                
-        display.println(beatAvg); 
-        display.display();
-        tone(3,1000);        
-        noTone(3);              
+    // Imprime la información correspondiente según el tipo de mensaje para la pantalla
+      switch (pantallaMessageType) {
+        case 1:
+          // Imprimir distancia y pasos
+          display.print("Distancia: ");
+          display.println(distancia);
+          display.print("Pasos: ");
+          display.println(stepCount);
+          break;
+        case 2:
+          // Imprimir ritmo cardíaco
+          display.drawBitmap(5, 5, logo2_bmp, 24, 21, WHITE);       
+          display.setTextSize(2);                                   
+          display.setTextColor(WHITE);  
+          display.setCursor(50,0);                
+          display.println("BPM");             
+          display.setCursor(50,18);                
+          display.println(beatAvg);  
+          display.display();
+          
+        if (checkForBeat(particleSensor.getIR()) == true)                       
+        {
+          display.clearDisplay();                              
+          display.drawBitmap(0, 0, logo3_bmp, 32, 32, WHITE);    
+          display.setTextSize(2);                               
+          display.setTextColor(WHITE);             
+          display.setCursor(50,0);                
+          display.println("BPM");             
+          display.setCursor(50,18);                
+          display.println(beatAvg); 
+          display.display();
+          tone(3,1000);        
+          noTone(3);              
 
+        }
+          
+          break;
+        case 3:
+          // Imprimir temperatura
+            display.print("Temp: ");
+            display.print(temperature);
+            display.println(" C");
+          break;
+        case 4:
+          // Imprimir reloj
+            display.println(lastClockMessage);
+          
+          break;
+        default:
+          display.println("");
+          break;
       }
-        
-        break;
-      case 3:
-        // Imprimir temperatura
-          display.print("Temp: ");
-          display.print(temperature);
-          display.println(" C");
-        break;
-      case 4:
-        // Imprimir reloj
-          display.println(lastClockMessage);
-        
-        break;
-      default:
-        display.println("");
-        break;
-    }
-  
-  display.display();
+    
+    display.display();
+  }
 }

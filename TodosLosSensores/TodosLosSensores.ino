@@ -4,6 +4,11 @@
 #include <Adafruit_SSD1306.h>
 #include "MAX30105.h"
 #include "heartRate.h"
+#include <BLEDevice.h>
+#include <BLEServer.h>
+#include <BLEUtils.h>
+#include <BLE2902.h>
+ 
 
 static const unsigned char PROGMEM  logo2_bmp[] =
 { 0x03, 0xC0, 0xF0, 0x06, 0x71, 0x8C, 0x0C, 0x1B, 0x06, 0x18, 0x0E,  0x02, 0x10, 0x0C, 0x03, 0x10,              //Logo2 and Logo3 are two bmp pictures  that display on the OLED if called
@@ -144,6 +149,17 @@ const int PROGMEM melody[] = {
   NOTE_GS5,2,
 };
 
+
+#define SERVICE_UUID           "6E400001-B5A3-F393-E0A9-E50E24DCCA9E" 
+#define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
+#define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
+
+BLEServer *pServer = NULL;
+BLECharacteristic * pTxCharacteristic;
+bool deviceConnected = false;
+bool oldDeviceConnected = false;
+
+
 bool activo = false;
 
 int notes = sizeof(melody) / sizeof(melody[0]) / 2;
@@ -189,6 +205,7 @@ int mq3Value = 0;
 #define SCREEN_HEIGHT 64
 
 MPU6050 mpu;
+MPU6050 mpus[15];
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire1);
 double distancia = 0;
 int16_t ax, ay, az;
@@ -205,7 +222,7 @@ unsigned long previousMillisPulseSensor = 0;
 unsigned long previousMillisScreen = 0;
 const long intervalAccel = 100;  
 const long intervalSreen = 10000;
-const long intervalMQ3 = 5900;
+const long intervalMQ3 = 4000;
 const long intervalPulseSensor = 20;
 // Vars globales sensores
 double temperature = 0.0;
@@ -213,136 +230,90 @@ int myBPM = 0;
 String readString = "";
 
 int numSensores = -1;
-String sensores[15];
+String sensores[15][2];
 
 const int button1Pin = 16; 
 const int button2Pin = 17;
 bool button1State = LOW;
 bool button2State = LOW;
 
-void setup() {
-  Serial.begin(9600);
 
-  pinMode(button1Pin, INPUT_PULLUP);
-  pinMode(button2Pin, INPUT_PULLUP);
-  
-  Wire1.begin(max_sda_pin, max_scl_pin);
-    if (!particleSensor.begin(Wire1)) 
-  {
-    while (1);
-  }
+void setSensor(String linea){
+  activo = true;
+  if(numSensores<=15){
+    int firstIndex = 8;
+    int lastColonIndex = linea.lastIndexOf(':');
+    String id = linea.substring(firstIndex + 1, lastColonIndex);
+    String lastPart = data.substring(lastColonIndex + 1);
 
-  particleSensor.setup(); 
-  particleSensor.setPulseAmplitudeRed(0x0A); 
-  particleSensor.setPulseAmplitudeGreen(0);
-
-
-
-  //Activar sensor MPU6050
-
-  Wire.begin(mpu_sda_pin, mpu_scl_pin);
-  mpu.initialize();
-  if (!mpu.testConnection()) {
-    while (1);
-  } else {
-  }
-  
-
+    int pines[8] = {0};
+    int index = 0;
+    int startPos = 0;
+    while (startPos < lastPart.length() && index < 8) {
+      int endPos = lastPart.indexOf('-', startPos);
       
-  //Activar oled SSD1306
-
-  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
-    while (true);
-  }
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
-  display.display();
-
-  pinMode(mq3Pin, INPUT);
-  pinMode(BUZZER_PIN, OUTPUT);
-  ActualizarPantalla(); 
-
-}
-
-void loop() {
-  unsigned long currentMillis = millis();
-
-  if (currentMillis - previousMillisAccel >= intervalAccel) {
-    previousMillisAccel = currentMillis;
-    Acelerometro();
-  }
-  if (currentMillis - previousMillisScreen >= intervalSreen) {
-    previousMillisScreen = currentMillis;
-    ActualizarPantalla();
-  }
-  if (currentMillis - previousMillisMQ3 >= intervalMQ3) {
-    previousMillisMQ3 = currentMillis;
-    MedirMQ3();
-    MedirTermistor();
-    EnviarDatos();
-  }
-  if (currentMillis - previousMillisPulseSensor >= intervalPulseSensor) {
-    previousMillisPulseSensor = currentMillis;
-    MedirPulseSensor();
-    if (digitalRead(button1Pin) == LOW && button1State == HIGH) {
-      if(pantallaMessageType<5){
-        pantallaMessageType = pantallaMessageType + 1;
-      }else{
-        pantallaMessageType = 1;
+      if (endPos == -1) {  
+        endPos = lastPart.length();
       }
-      ActualizarPantalla();
-    }else if (digitalRead(button2Pin) == LOW && button2State == HIGH) {
-      previousMillis = millis();
-      thisNote = 0;
-      alarmActive = false;
-      noTone(BUZZER_PIN);
+
+      pines[index] = lastPart.substring(startPos, endPos).toInt();
+      index++;
+      
+      startPos = endPos + 1;
     }
-    
-    button1State = digitalRead(button1Pin);
-    button2State = digitalRead(button2Pin);
+
+    bool agregar = true;
+    for(int i = 0; i <= numSensores; i++){
+      int firstColonIndex = sensores[i].indexOf(':');
+      int secondColonIndex = sensores[i].indexOf(':', firstColonIndex + 1);
+      if(id==sensores[i].substring(firstColonIndex + 1, secondColonIndex)){
+        agregar = false;
+        i = numSensores+1;
+      }
+    }
+    if(agregar==true){
+      String typeRequest = linea.substring(4, 7);
+      typeRequest = typeRequest +":"+ id +":0";
+      switch (typeRequest){
+
+        case "RTC":
+
+          max_sda_pin = pines[0];
+          max_scl_pin = pines[1];
+
+        case "ALC":
+
+          pinMode(pines[0], INPUT);
+
+        case "PSS":
+
+          Wire.begin(pines[0], pines[1]);
+          mpu.initialize();
+          if (!mpu.testConnection()) {
+            while (1);
+          } 
+          
+          mpu_sda_pin = pines[0];
+          mpu_scl_pin = pines[1];
+
+
+
+      }
+      sensores[numSensores+1] = {typeRequest, pines}; 
+      numSensores = numSensores + 1;
+    }
   }
-  activarAlarma();
 }
 
 
-void setSensorValue(int id, String value){
-  for(int i = 0; i <= numSensores; i++){
-    int firstColonIndex = sensores[i].indexOf(':');
-    int secondColonIndex = sensores[i].indexOf(':', firstColonIndex + 1);
 
-    if(id==sensores[i].substring(firstColonIndex + 1, secondColonIndex).toInt()){
-      sensores[i]=sensores[i].substring(0,secondColonIndex+1)+value;
-    } 
-  }
-}
-
-void setSensorValue(String type, String value){
-  for(int i = 0; i <= numSensores; i++){
-    if(type==sensores[i].substring(0,3)){
-      sensores[i]=sensores[i].substring(0,sensores[i].indexOf(':', sensores[i].indexOf(':') + 1))+":"+value;
-    } 
-  }
-}
-
-String getSensorValue(String id){
-  for(int i = 0; i <= numSensores; i++){
-    int firstColonIndex = sensores[i].indexOf(':');
-    int secondColonIndex = sensores[i].indexOf(':', firstColonIndex + 1);
-
-    if(id==sensores[i].substring(firstColonIndex + 1, secondColonIndex)){
-      return sensores[i];
-    } 
-  }
-  return "";
-}
-
-void EnviarDatos(){
-  readString = Serial.readString();
-  String linea = extractFirstLine(readString);
+void EnviarDatos(String linea){
   if(linea != ""){
     String request = linea.substring(0, 3);
     if(request=="REA"){
+      String message = getSensorValue(linea.substring(4));
+      pTxCharacteristic->setValue(message); 
+      pTxCharacteristic->notify();
       Serial.println(getSensorValue(linea.substring(4)));
     } 
     else if (request=="RLJ"){
@@ -368,24 +339,7 @@ void EnviarDatos(){
       }
     }
     else if (request=="NEW"){
-      activo = true;
-      if(numSensores<=15){
-        String id = linea.substring(8);
-        bool agregar = true;
-        for(int i = 0; i <= numSensores; i++){
-          int firstColonIndex = sensores[i].indexOf(':');
-          int secondColonIndex = sensores[i].indexOf(':', firstColonIndex + 1);
-          if(id==sensores[i].substring(firstColonIndex + 1, secondColonIndex)){
-            agregar = false;
-            i = numSensores+1;
-          }
-        }
-        if(agregar==true){
-          String typeRequest = linea.substring(4, 7);
-          sensores[numSensores+1] = typeRequest +":"+ id +":0"; 
-          numSensores = numSensores + 1;
-        }
-      }
+      setSensor(linea);
     } 
     else if(request == "DES"){
       activo = false;
@@ -418,13 +372,180 @@ void EnviarDatos(){
     }
 
     if(readString.indexOf('\n') != -1){
-      EnviarDatos(readString);
+      EnviarDatosLn(readString);
     }
     
   }
   
 
 }
+
+
+class MyServerCallbacks: public BLEServerCallbacks {
+    void onConnect(BLEServer* pServer) {
+      deviceConnected = true;
+    };
+ 
+    void onDisconnect(BLEServer* pServer) {
+      deviceConnected = false;
+    }
+};
+ 
+class MyCallbacks: public BLECharacteristicCallbacks {
+    void onWrite(BLECharacteristic *pCharacteristic) {
+      String rxValue = pCharacteristic->getValue();
+      Serial.println(rxValue);
+      if (rxValue.length() > 0) {
+        for (int i = 0; i < rxValue.length(); i++){
+        }
+      }
+      EnviarDatos(rxValue);
+    }
+};
+
+void setup() {
+  Serial.begin(9600);
+  
+  pinMode(button1Pin, INPUT_PULLUP);
+  pinMode(button2Pin, INPUT_PULLUP);
+
+  Wire1.begin(max_sda_pin, max_scl_pin);
+  if (!particleSensor.begin(Wire1)) 
+  {
+    while (1);
+  }
+
+  particleSensor.setup(); 
+  particleSensor.setPulseAmplitudeRed(0x0A); 
+  particleSensor.setPulseAmplitudeGreen(0);
+
+  //Activar sensor MPU6050
+
+  Wire.begin(mpu_sda_pin, mpu_scl_pin);
+  mpu.initialize();
+  if (!mpu.testConnection()) {
+    while (1);
+  } 
+  //Activar oled SSD1306
+
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    while (true);
+  }
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.display();
+
+  pinMode(BUZZER_PIN, OUTPUT);
+  ActualizarPantalla(); 
+
+
+
+  BLEDevice::init("ESP32");
+ 
+  pServer = BLEDevice::createServer();
+  pServer->setCallbacks(new MyServerCallbacks());
+ 
+  BLEService *pService = pServer->createService(SERVICE_UUID);
+ 
+  pTxCharacteristic = pService->createCharacteristic(
+                                        CHARACTERISTIC_UUID_TX,
+                                        BLECharacteristic::PROPERTY_NOTIFY
+                                    );
+                      
+  pTxCharacteristic->addDescriptor(new BLE2902());
+ 
+  BLECharacteristic * pRxCharacteristic = pService->createCharacteristic(
+                                             CHARACTERISTIC_UUID_RX,
+                                            BLECharacteristic::PROPERTY_WRITE
+                                        );
+ 
+  pRxCharacteristic->setCallbacks(new MyCallbacks());
+ 
+  pService->start();
+ 
+  pServer->getAdvertising()->start();
+  
+}
+
+void loop() {
+  unsigned long currentMillis = millis();
+
+  if (currentMillis - previousMillisAccel >= intervalAccel) {
+    previousMillisAccel = currentMillis;
+    Acelerometro();
+  }
+  if (currentMillis - previousMillisScreen >= intervalSreen) {
+    previousMillisScreen = currentMillis;
+    ActualizarPantalla();
+  }
+  if (currentMillis - previousMillisMQ3 >= intervalMQ3) {
+    previousMillisMQ3 = currentMillis;
+    MedirMQ3();
+    MedirTermistor();
+    if (deviceConnected && !oldDeviceConnected) {
+      oldDeviceConnected = deviceConnected;
+    } else if (!deviceConnected && oldDeviceConnected) {
+      pServer->startAdvertising();
+      oldDeviceConnected = deviceConnected;
+    }
+  }
+  if (currentMillis - previousMillisPulseSensor >= intervalPulseSensor) {
+    previousMillisPulseSensor = currentMillis;
+    MedirPulseSensor();
+    if (digitalRead(button1Pin) == LOW && button1State == HIGH) {
+      if(pantallaMessageType<5){
+        pantallaMessageType = pantallaMessageType + 1;
+      }else{
+        pantallaMessageType = 1;
+      }
+      ActualizarPantalla();
+    }else if (digitalRead(button2Pin) == LOW && button2State == HIGH) {
+      previousMillis = millis();
+      thisNote = 0;
+      alarmActive = false;
+      noTone(BUZZER_PIN);
+    }
+    
+    button1State = digitalRead(button1Pin);
+    button2State = digitalRead(button2Pin);
+  }
+  activarAlarma();
+
+}
+
+
+void setSensorValue(int id, String value){
+  for(int i = 0; i <= numSensores; i++){
+    int firstColonIndex = sensores[i][0].indexOf(':');
+    int secondColonIndex = sensores[i][0].indexOf(':', firstColonIndex + 1);
+
+    if(id==sensores[i][0].substring(firstColonIndex + 1, secondColonIndex).toInt()){
+      sensores[i][0]=sensores[i][0].substring(0,secondColonIndex+1)+value;
+    } 
+  }
+}
+
+void setSensorValue(String type, String value){
+  for(int i = 0; i <= numSensores; i++){
+    if(type==sensores[i][0].substring(0,3)){
+      sensores[i][0]=sensores[i][0].substring(0,sensores[i][0].indexOf(':', sensores[i][0].indexOf(':') + 1))+":"+value;
+    } 
+  }
+}
+
+String getSensorValue(String id){
+  for(int i = 0; i <= numSensores; i++){
+    int firstColonIndex = sensores[i][0].indexOf(':');
+    int secondColonIndex = sensores[i][0].indexOf(':', firstColonIndex + 1);
+
+    if(id==sensores[i][0].substring(firstColonIndex + 1, secondColonIndex)){
+      return sensores[i][0];
+    } 
+  }
+  return "";
+}
+
 
 String extractFirstLine(String &str) {
   int newlineIndex = str.indexOf('\n'); 
@@ -443,32 +564,17 @@ String extractFirstLine(String &str) {
 }
 
 
-void EnviarDatos(String letReadString){
+void EnviarDatosLn(String letReadString){
     String linea = extractFirstLine(letReadString);
     if(linea != ""){
       String request = linea.substring(0, 3);
       if(request=="REA"){
         Serial.println(getSensorValue(linea.substring(4)));
       } 
-      else if (request=="NEW"){
-        if(numSensores<=15){
-          String id = linea.substring(8);
-          bool agregar = true;
-          for(int i = 0; i <= numSensores; i++){
-            int firstColonIndex = sensores[i].indexOf(':');
-            int secondColonIndex = sensores[i].indexOf(':', firstColonIndex + 1);
-            if(id==sensores[i].substring(firstColonIndex + 1, secondColonIndex)){
-              agregar = false;
-              i = numSensores+1;
-            }
-          }
-          if(agregar==true){
-            String typeRequest = linea.substring(4, 7);
-            sensores[numSensores+1] = typeRequest +":"+ id +":0"; 
-            numSensores = numSensores + 1;
-          }
-        }
-      } 
+ 
+    else if (request=="NEW"){
+      setSensor(linea);
+    } 
       else if (request=="UPA"){
         String typeRequest = linea.substring(4, 7);
         if (typeRequest == "RTC") {
@@ -489,7 +595,7 @@ void EnviarDatos(String letReadString){
       }
 
       if(letReadString.indexOf('\n') != -1){
-        EnviarDatos(letReadString);
+        EnviarDatosLn(letReadString);
       }
       
     }
@@ -528,28 +634,42 @@ void Acelerometro() {
 }
 
 void MedirMQ3() {
-  mq3Value = analogRead(mq3Pin) - 800;
-    setSensorValue("ALC",String(mq3Value));
+  for(int i = 0; i <= sensores; i++){
+    if(sensores[i][0].substring(0,3)=="ALC"){
+
+      mq3Value = analogRead(sensores[i][1][0]) - 800;
+
+      int firstColonIndex = sensores[i][0].indexOf(':');
+      int secondColonIndex = sensores[i][0].indexOf(':', firstColonIndex + 1);
+
+      setSensorValue(sensores[i][0].substring(firstColonIndex + 1, secondColonIndex).toInt(),String(mq3Value));
+    }
+  }
 
 }
 
 void MedirTermistor() {
-    
-  const double A = 0.001129148;
-  const double B = 0.000234125;
-  const double C = 0.0000000876741;
-  int rawValue = analogRead(analogPin); // Lee el valor del ADC
-  double voltage = (rawValue / 4095.0) * 3.3; // Convierte a voltaje
-  double resistance = (3.3 * 10000 / voltage) - 10000; // Calcula la resistencia del NTC
+  
+  for(int i = 0; i <= sensores; i++){
+    if(sensores[i][0].substring(0,3)=="TMP"){
+      const double A = 0.001129148;
+      const double B = 0.000234125;
+      const double C = 0.0000000876741;
 
-  temperature = (1.0 / (A + B * log(resistance) + C * pow(log(resistance), 3))) - 273.15;
+      int rawValue = analogRead(sensores[i][1][0]); 
+      double voltage = (rawValue / 4095.0) * 3.3; 
+      double resistance = (3.3 * 10000 / voltage) - 10000; 
+      temperature = (1.0 / (A + B * log(resistance) + C * pow(log(resistance), 3))) - 273.15;
 
-  setSensorValue("TMP",String(temperature));
+      int firstColonIndex = sensores[i][0].indexOf(':');
+      int secondColonIndex = sensores[i][0].indexOf(':', firstColonIndex + 1);
 
+      setSensorValue(sensores[i][0].substring(firstColonIndex + 1, secondColonIndex).toInt(),String(temperature));
+    }
+  }
 }
 
 void MedirPulseSensor() {
-
     long irValue = particleSensor.getIR();
     if(checkForBeat(irValue) == true){
   
